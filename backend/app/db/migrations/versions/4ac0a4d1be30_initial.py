@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import text
 
 
 # revision identifiers, used by Alembic.
@@ -34,6 +35,19 @@ mini_game_type_enum = sa.Enum(
 
 def upgrade() -> None:
     bind = op.get_bind()
+    bind.execute(
+        text(
+            """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+                CREATE TYPE user_role AS ENUM ('athlete','coach','parent','psychologist','admin');
+            END IF;
+        END$$;
+        """
+        )
+    )
+
     user_role_enum.create(bind, checkfirst=True)
     scenario_kind_enum.create(bind, checkfirst=True)
     scenario_role_scope_enum.create(bind, checkfirst=True)
