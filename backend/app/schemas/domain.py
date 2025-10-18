@@ -93,6 +93,12 @@ class ProgressRead(ProgressWrite):
     pass
 
 
+class ProgressSummary(BaseModel):
+    points: int = 0
+    level: int = 1
+    badges: list[str] = Field(default_factory=list)
+
+
 class MiniGameResultWrite(ORMModel):
     user_id: int
     type: MiniGameType
@@ -102,6 +108,15 @@ class MiniGameResultWrite(ORMModel):
 class MiniGameResultRead(MiniGameResultWrite):
     id: int
     created_at: datetime
+
+
+class MiniGameResultCreateRequest(BaseModel):
+    score: int = Field(ge=0)
+
+
+class MiniGameResultResponse(BaseModel):
+    result: MiniGameResultRead
+    progress: ProgressSummary
 
 
 class CourseWrite(ORMModel):
