@@ -19,6 +19,24 @@ services:
     ports:
       - "8000:8000"
 
+  seed:
+    build: .
+    command: python -m backend.app.db.seed
+    volumes:
+      - ./backend:/app/backend
+      - ./requirements.txt:/app/requirements.txt:ro
+    environment:
+      - DATABASE_URL=
+      - JWT_SECRET=
+      - JWT_ALGO=
+      - JWT_EXPIRE_MINUTES=
+      - CORS_ORIGINS=
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     image: postgres:15
     environment:
