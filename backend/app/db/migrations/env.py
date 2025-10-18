@@ -14,6 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from app.core.config import settings  # noqa: E402
 from app.db.base import Base  # noqa: E402
+from app import models  # noqa: F401,E402  # Import models for metadata registration
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
