@@ -1,6 +1,9 @@
 """Pydantic schemas for API payloads."""
 
 from .domain import (
+    ChoiceApplyRequest,
+    ChoiceApplyResponse,
+    ChoiceCreate,
     ChoiceRead,
     ChoiceWrite,
     CourseEnrollmentRead,
@@ -13,6 +16,8 @@ from .domain import (
     MiniGameResultWrite,
     ProgressRead,
     ProgressWrite,
+    ScenarioCreate,
+    ScenarioDetail,
     ScenarioRead,
     ScenarioWrite,
     UserPublic,
@@ -25,8 +30,13 @@ __all__ = [
     "UserWrite",
     "ScenarioRead",
     "ScenarioWrite",
+    "ScenarioCreate",
+    "ScenarioDetail",
     "ChoiceRead",
     "ChoiceWrite",
+    "ChoiceCreate",
+    "ChoiceApplyRequest",
+    "ChoiceApplyResponse",
     "ProgressRead",
     "ProgressWrite",
     "MiniGameResultRead",

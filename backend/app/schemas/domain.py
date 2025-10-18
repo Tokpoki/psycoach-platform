@@ -43,6 +43,17 @@ class ScenarioRead(ScenarioWrite):
     id: int
 
 
+class ChoiceCreate(BaseModel):
+    text: str = Field(min_length=1)
+    explanation: str = Field(min_length=1)
+    skill_tags: list[str] = Field(default_factory=list)
+    score_delta: int
+
+
+class ScenarioCreate(ScenarioWrite):
+    choices: list[ChoiceCreate] = Field(default_factory=list)
+
+
 class ChoiceWrite(ORMModel):
     scenario_id: int
     text: str
@@ -53,6 +64,22 @@ class ChoiceWrite(ORMModel):
 
 class ChoiceRead(ChoiceWrite):
     id: int
+
+
+class ScenarioDetail(ScenarioRead):
+    choices: list[ChoiceRead] = Field(default_factory=list)
+
+
+class ChoiceApplyRequest(BaseModel):
+    choice_id: int
+
+
+class ChoiceApplyResponse(BaseModel):
+    applied_skill: list[str]
+    explanation: str
+    new_points: int
+    new_level: int
+    new_badges: list[str]
 
 
 class ProgressWrite(ORMModel):
