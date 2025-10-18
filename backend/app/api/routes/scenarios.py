@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import or_, select
-from sqlalchemy.orm import Session, joinedload
-
 from app.api import deps
 from app.db.session import get_db
 from app.models.domain import Choice, Scenario, ScenarioKind, User, UserRole
@@ -16,6 +12,9 @@ from app.schemas import (
     ScenarioDetail,
 )
 from app.services import apply_effect
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import or_, select
+from sqlalchemy.orm import Session, joinedload
 
 router = APIRouter(prefix="/scenarios", tags=["scenarios"])
 
@@ -25,7 +24,10 @@ def list_scenarios(
     *,
     role: UserRole | None = Query(
         default=None,
-        description="Filter scenarios by role scope. Scenarios available to all roles are always included.",
+        description=(
+            "Filter scenarios by role scope. "
+            "Scenarios available to all roles are always included."
+        ),
     ),
     kind: ScenarioKind | None = Query(
         default=None, description="Filter scenarios by their thematic kind."
@@ -36,11 +38,14 @@ def list_scenarios(
 
     stmt = select(Scenario).options(joinedload(Scenario.choices))
     if role is not None:
-        stmt = stmt.where(or_(Scenario.role_scope.is_(None), Scenario.role_scope == role))
+        stmt = stmt.where(
+            or_(Scenario.role_scope.is_(None), Scenario.role_scope == role)
+        )
     if kind is not None:
         stmt = stmt.where(Scenario.kind == kind)
 
-    scenarios = db.scalars(stmt.order_by(Scenario.id)).all()
+    result = db.execute(stmt.order_by(Scenario.id))
+    scenarios = result.unique().scalars().all()
     return [ScenarioDetail.model_validate(scenario) for scenario in scenarios]
 
 
@@ -57,10 +62,14 @@ def get_scenario(
     """Return a single scenario with its choices."""
 
     scenario = db.execute(
-        select(Scenario).options(joinedload(Scenario.choices)).where(Scenario.id == scenario_id)
+        select(Scenario)
+        .options(joinedload(Scenario.choices))
+        .where(Scenario.id == scenario_id)
     ).scalar_one_or_none()
     if scenario is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scenario not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Scenario not found."
+        )
 
     return ScenarioDetail.model_validate(scenario)
 

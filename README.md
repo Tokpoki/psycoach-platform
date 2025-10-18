@@ -140,3 +140,37 @@ make seed
 ```
 
 После применения сидов доступен тестовый администратор `admin@local` с паролем `admin`.
+
+# 12. Проверки и качество кода
+
+## 12.1. Установка зависимостей для разработки
+
+```bash
+pip install -r requirements.txt
+```
+
+## 12.2. Запуск тестов и измерение покрытия
+
+```bash
+pytest
+```
+
+Команда включает подсчёт покрытия (`pytest --cov`) и должна поддерживаться на уровне не ниже 80%.
+
+## 12.3. Линтеры и статический анализ
+
+```bash
+ruff check
+black --check .
+isort --check-only .
+mypy --config-file mypy.ini backend/app
+```
+
+## 12.4. Pre-commit хуки
+
+```bash
+pre-commit install
+pre-commit run --all-files
+```
+
+Хуки запускают форматирование, линтеры и mypy перед коммитами.
