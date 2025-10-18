@@ -113,3 +113,18 @@
 ```bash
 docker compose up
 ```
+
+# 10. Миграции БД
+
+Для работы с миграциями используется Alembic. Основные команды:
+
+```bash
+# создание новой миграции на основе текущих моделей
+alembic revision --autogenerate -m "init"
+
+# применение всех миграций
+alembic upgrade head
+
+# откат на одну версию при необходимости
+alembic downgrade -1
+```
