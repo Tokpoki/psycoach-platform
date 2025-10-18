@@ -10,6 +10,7 @@ from __future__ import annotations
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import text
+from sqlalchemy.dialects.postgresql import ENUM as PGEnum
 
 
 # revision identifiers, used by Alembic.
@@ -19,17 +20,17 @@ branch_labels = None
 depends_on = None
 
 
-user_role_enum = sa.Enum(
-    "athlete", "coach", "parent", "psychologist", "admin", name="user_role"
+user_role_enum = PGEnum(
+    "athlete", "coach", "parent", "psychologist", "admin", name="user_role", create_type=False
 )
-scenario_kind_enum = sa.Enum(
-    "prestart", "defeat", "conflict", "judgement", "injury", name="scenario_kind"
+scenario_kind_enum = PGEnum(
+    "prestart", "defeat", "conflict", "judgement", "injury", name="scenario_kind", create_type=False
 )
-scenario_role_scope_enum = sa.Enum(
-    "athlete", "coach", "parent", "psychologist", "admin", name="scenario_role_scope"
+scenario_role_scope_enum = PGEnum(
+    "athlete", "coach", "parent", "psychologist", "admin", name="scenario_role_scope", create_type=False
 )
-mini_game_type_enum = sa.Enum(
-    "focus", "visualization", "stress", "regulation", name="mini_game_type"
+mini_game_type_enum = PGEnum(
+    "focus", "visualization", "stress", "regulation", name="mini_game_type", create_type=False
 )
 
 
@@ -47,11 +48,42 @@ def upgrade() -> None:
         """
         )
     )
-
-    user_role_enum.create(bind, checkfirst=True)
-    scenario_kind_enum.create(bind, checkfirst=True)
-    scenario_role_scope_enum.create(bind, checkfirst=True)
-    mini_game_type_enum.create(bind, checkfirst=True)
+    bind.execute(
+        text(
+            """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'scenario_kind') THEN
+                CREATE TYPE scenario_kind AS ENUM ('prestart','defeat','conflict','judgement','injury');
+            END IF;
+        END$$;
+        """
+        )
+    )
+    bind.execute(
+        text(
+            """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'scenario_role_scope') THEN
+                CREATE TYPE scenario_role_scope AS ENUM ('athlete','coach','parent','psychologist','admin');
+            END IF;
+        END$$;
+        """
+        )
+    )
+    bind.execute(
+        text(
+            """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'mini_game_type') THEN
+                CREATE TYPE mini_game_type AS ENUM ('focus','visualization','stress','regulation');
+            END IF;
+        END$$;
+        """
+        )
+    )
 
     op.create_table(
         "users",
@@ -142,7 +174,7 @@ def downgrade() -> None:
     op.drop_table("users")
 
     bind = op.get_bind()
-    mini_game_type_enum.drop(bind, checkfirst=True)
-    scenario_role_scope_enum.drop(bind, checkfirst=True)
-    scenario_kind_enum.drop(bind, checkfirst=True)
-    user_role_enum.drop(bind, checkfirst=True)
+    bind.execute(text("DROP TYPE IF EXISTS mini_game_type CASCADE;"))
+    bind.execute(text("DROP TYPE IF EXISTS scenario_role_scope CASCADE;"))
+    bind.execute(text("DROP TYPE IF EXISTS scenario_kind CASCADE;"))
+    bind.execute(text("DROP TYPE IF EXISTS user_role CASCADE;"))
