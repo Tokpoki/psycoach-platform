@@ -25,6 +25,13 @@ class UserRead(UserWrite):
     created_at: datetime
 
 
+class UserPublic(ORMModel):
+    id: int
+    email: EmailStr
+    role: UserRole
+    created_at: datetime
+
+
 class ScenarioWrite(ORMModel):
     title: str = Field(min_length=1)
     kind: ScenarioKind
