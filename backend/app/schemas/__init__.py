@@ -15,6 +15,7 @@ from .domain import (
     ProgressWrite,
     ScenarioRead,
     ScenarioWrite,
+    UserPublic,
     UserRead,
     UserWrite,
 )
@@ -36,4 +37,5 @@ __all__ = [
     "CourseLessonWrite",
     "CourseEnrollmentRead",
     "CourseEnrollmentWrite",
+    "UserPublic",
 ]
