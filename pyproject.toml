@@ -1,0 +1,36 @@
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+src = ["backend/app", "tests"]
+extend-exclude = [
+    "backend/app/db/migrations",
+    "backend/app/db/seed.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "B"]
+ignore = ["B008", "E501"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=backend/app --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["backend/app"]
+branch = true
+omit = [
+    "backend/app/db/seed.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
