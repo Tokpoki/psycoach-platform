@@ -1,5 +1,6 @@
 from app.api import api_router
 from app.core.config import settings
+from app.core.database import ensure_database_ready
 from app.core.logging import configure_logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 configure_logging()
 
 app = FastAPI(title=settings.PROJECT_NAME)
+
+
+@app.on_event("startup")
+def _startup_checks() -> None:
+    ensure_database_ready()
 
 if settings.CORS_ORIGINS:
     origins = [str(origin) for origin in settings.CORS_ORIGINS]

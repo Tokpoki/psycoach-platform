@@ -10,25 +10,24 @@ from app.core.security import create_access_token, get_password_hash, verify_pas
 from app.db.session import get_db
 from app.models.domain import User
 from app.schemas import auth as auth_schema
-from app.schemas.domain import UserPublic
 
 router = APIRouter(tags=["auth"])
 
 
 @router.post(
     "/register",
-    response_model=UserPublic,
+    response_model=auth_schema.TokenResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
     description=(
         "Create a user account with the provided e-mail, password and role."
-        " The password is stored securely using bcrypt hashing."
+        " Returns a JWT so the client can authenticate subsequent requests."
     ),
 )
 def register_user(
     payload: auth_schema.RegisterRequest, db: Session = Depends(get_db)
-) -> UserPublic:
-    """Register a user if the e-mail is not already taken."""
+) -> auth_schema.TokenResponse:
+    """Register a user, ensuring e-mail uniqueness and returning an auth token."""
     existing_user = db.execute(
         select(User).where(User.email == payload.email)
     ).scalar_one_or_none()
@@ -46,7 +45,9 @@ def register_user(
     db.add(user)
     db.commit()
     db.refresh(user)
-    return UserPublic.model_validate(user)
+
+    token = create_access_token(subject=str(user.id))
+    return auth_schema.TokenResponse(access_token=token)
 
 
 @router.post(

@@ -11,6 +11,10 @@ from sqlalchemy.sql import func
 from app.db.base import Base
 
 
+def enum_values(enum_cls: type[enum.Enum]) -> list[str]:
+    return [member.value for member in enum_cls]
+
+
 class UserRole(str, enum.Enum):
     ATHLETE = "athlete"
     COACH = "coach"
@@ -41,7 +45,9 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String(length=320), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(length=255), nullable=False)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole, name="user_role"), nullable=False)
+    role: Mapped[UserRole] = mapped_column(
+        Enum(UserRole, name="user_role", values_callable=enum_values), nullable=False
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -62,10 +68,12 @@ class Scenario(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(length=255), nullable=False)
-    kind: Mapped[ScenarioKind] = mapped_column(Enum(ScenarioKind, name="scenario_kind"), nullable=False)
+    kind: Mapped[ScenarioKind] = mapped_column(
+        Enum(ScenarioKind, name="scenario_kind", values_callable=enum_values), nullable=False
+    )
     content_json: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     role_scope: Mapped[UserRole | None] = mapped_column(
-        Enum(UserRole, name="scenario_role_scope"), nullable=True
+        Enum(UserRole, name="scenario_role_scope", values_callable=enum_values), nullable=True
     )
 
     choices: Mapped[list["Choice"]] = relationship(
@@ -105,7 +113,7 @@ class MiniGameResult(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     type: Mapped[MiniGameType] = mapped_column(
-        Enum(MiniGameType, name="mini_game_type"), nullable=False
+        Enum(MiniGameType, name="mini_game_type", values_callable=enum_values), nullable=False
     )
     score: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(

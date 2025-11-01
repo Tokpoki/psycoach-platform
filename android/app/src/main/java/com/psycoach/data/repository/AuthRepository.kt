@@ -1,5 +1,6 @@
 package com.psycoach.data.repository
 
+import android.util.Log
 import com.psycoach.data.local.TokenStorage
 import com.psycoach.data.model.AuthResponse
 import com.psycoach.data.model.LoginRequest
@@ -23,13 +24,23 @@ class AuthRepository @Inject constructor(
                     tokenStorage.saveToken(body.accessToken)
                     Result.Success(body)
                 } else {
-                    Result.Error("Empty response body")
+                    Result.Error("Empty response body while registering user.")
                 }
             } else {
-                Result.Error("Registration failed: ${response.code()}")
+                val debugMessage = buildString {
+                    append("Registration failed: HTTP ${response.code()}")
+                    response.errorBody()?.string()?.takeIf { it.isNotBlank() }?.let { error ->
+                        append(" – ")
+                        append(error)
+                    }
+                }
+                Log.e("AuthRepository", debugMessage)
+                Result.Error(debugMessage)
             }
         } catch (e: Exception) {
-            Result.Error("Unable to register", e)
+            val message = "Unable to register: ${e.localizedMessage ?: e.javaClass.simpleName}"
+            Log.e("AuthRepository", message, e)
+            Result.Error(message, e)
         }
     }
 
@@ -42,13 +53,23 @@ class AuthRepository @Inject constructor(
                     tokenStorage.saveToken(body.accessToken)
                     Result.Success(body)
                 } else {
-                    Result.Error("Empty response body")
+                    Result.Error("Empty response body while logging in.")
                 }
             } else {
-                Result.Error("Login failed: ${response.code()}")
+                val debugMessage = buildString {
+                    append("Login failed: HTTP ${response.code()}")
+                    response.errorBody()?.string()?.takeIf { it.isNotBlank() }?.let { error ->
+                        append(" – ")
+                        append(error)
+                    }
+                }
+                Log.e("AuthRepository", debugMessage)
+                Result.Error(debugMessage)
             }
         } catch (e: Exception) {
-            Result.Error("Unable to login", e)
+            val message = "Unable to login: ${e.localizedMessage ?: e.javaClass.simpleName}"
+            Log.e("AuthRepository", message, e)
+            Result.Error(message, e)
         }
     }
 

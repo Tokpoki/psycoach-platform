@@ -93,6 +93,14 @@ fun LoginScreen(
             if (authState is Result.Error) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(text = authState.message, color = MaterialTheme.colorScheme.error)
+                authState.throwable?.localizedMessage?.takeIf { it.isNotBlank() }?.let { detail ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = detail,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
     }
